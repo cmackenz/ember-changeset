@@ -158,7 +158,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      * @return {Changeset}
      */
     execute() {
-      if (get(this, 'isValid') && get(this, 'isDirty')) {
+      if (get(this, 'isDirty')) {
         let content = get(this, CONTENT);
         let changes = get(this, CHANGES);
         setProperties(content, changes);
@@ -185,7 +185,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
         savePromise = content.save(options);
       }
 
-      return savePromise.then((result) => {
+      return savePromise.then(result => {
         this.rollback();
         return result;
       });
@@ -272,10 +272,9 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       }
 
       if (isNone(key)) {
-        let maybePromise = keys(validationMap)
-          .map((validationKey) => {
-            return this._validateAndSet(validationKey, this._valueFor(validationKey));
-          });
+        let maybePromise = keys(validationMap).map(validationKey => {
+          return this._validateAndSet(validationKey, this._valueFor(validationKey));
+        });
 
         return all(maybePromise);
       }
@@ -384,7 +383,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       }
 
       let changeKeys = keys(changes);
-      let validKeys = emberArray(changeKeys).filter((key) => includes(allowed, key));
+      let validKeys = emberArray(changeKeys).filter(key => includes(allowed, key));
       let casted = take(changes, validKeys);
 
       set(this, CHANGES, casted);
@@ -406,7 +405,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
       let validation = this._validate(key, value, oldValue);
 
       if (isPromise(validation)) {
-        return validation.then((resolvedValidation) => {
+        return validation.then(resolvedValidation => {
           return this._setProperty(resolvedValidation, { key, value, oldValue });
         });
       }
@@ -434,7 +433,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
           newValue,
           oldValue,
           changes: pureAssign(changes),
-          content,
+          content
         });
 
         return isPresent(isValid) ? isValid : true;
@@ -454,10 +453,7 @@ export function changeset(obj, validateFn = defaultValidatorFn, validationMap = 
      */
     _setProperty(validation, { key, value, oldValue } = {}) {
       let changes = get(this, CHANGES);
-      let isSingleValidationArray =
-        isArray(validation) &&
-        validation.length === 1 &&
-        validation[0] === true;
+      let isSingleValidationArray = isArray(validation) && validation.length === 1 && validation[0] === true;
 
       if (validation === true || isSingleValidationArray) {
         this._deleteKey(ERRORS, key);
